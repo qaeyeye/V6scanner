@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5.6.0
         with:
           python-version: '3.11'
 
@@ -23,7 +23,7 @@ jobs:
         run: pip install requests pandas numpy
 
       - name: Restore state
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.3
         with:
           path: last_signals.json
           key: scanner-state
@@ -35,7 +35,7 @@ jobs:
         run: python scanner.py
 
       - name: Save state
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.3
         with:
           path: last_signals.json
           key: scanner-state
