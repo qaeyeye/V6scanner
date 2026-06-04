@@ -26,7 +26,7 @@ SYMBOLS = [
     {"ticker": "CADJPY=X","name": "🇨🇦 CAD/JPY"},
 ]
 
-STATE_FILE = "last_signals.json"   # tracks sent alerts to avoid duplicates
+STATE_FILE = "last_signals.json"
 
 # ═══════════════════════════════════
 # LOAD / SAVE STATE
@@ -69,7 +69,7 @@ def fetch_candles(ticker, interval="5m", period="2d"):
                     "l": q["low"][i],
                     "c": q["close"][i],
                 })
-            return candles[-200:]   # last 200 bars
+            return candles[-200:]
         except Exception as e:
             print(f"  Attempt {attempt+1} failed for {ticker}: {e}")
             time.sleep(2)
@@ -222,6 +222,9 @@ def main():
     print(f"Scanner run: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
     print(f"{'='*50}")
 
+    # ✅ TEST MESSAGE — remove after confirming Telegram works
+    send_telegram("✅ *Scanner started successfully!*\nTelegram connection is working.")
+
     state = load_state()
 
     for sym in SYMBOLS:
@@ -237,13 +240,11 @@ def main():
         signal = detect_signal(candles)
 
         if signal:
-            # Avoid duplicate alerts — check if same signal time was already sent
             sig_key = f"{ticker}_{signal['time']}"
             if state.get(sig_key):
                 print(f"  ℹ️ Signal already sent: {sig_key}")
                 continue
 
-            # Only send if signal is fresh (within last 10 minutes)
             age_min = (time.time() * 1000 - signal["time"]) / 60000
             if age_min > 10:
                 print(f"  ℹ️ Signal too old: {age_min:.1f} min ago")
@@ -271,8 +272,6 @@ def main():
 
             print(f"  🚨 Signal: {signal['type']} W{signal['wave']} @ {signal['price']:.4f}")
             send_telegram(msg)
-
-            # Save to state so we don't resend
             state[sig_key] = True
 
         else:
